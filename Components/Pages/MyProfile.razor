@@ -1,0 +1,151 @@
+﻿@page "/MyProfile"
+@using CodersCupAward.Helper
+
+
+
+<Microsoft.AspNetCore.Components.Authorization.AuthorizeView Context="AuthenticationContext">
+    <Authorized>
+
+        <div class="leaderboard-container">
+            <div class="leaderboard-left">
+                @if (_showWait)
+                {
+                    <WaitState WaitTitle="@Constants.ApplicationLabelPleaseWait"
+                               WaitMessage="@Constants.ApplicationLabelPleaseWaitProcessing" />
+                }
+                else
+                {
+                    <div class="container">
+                        <div class="card mb-3">
+                            <EditForm Model="@_applicationUser" OnSubmit="SaveFormAsync">
+                                <div class="card-body">
+                                    <h1>Your Profile</h1>
+
+                                    <div class="row row-cols-1 row-cols-md-2 g-4">
+                                        <div class="col">
+                                            <div class="mb-3">
+                                                <span class="text-danger">*</span>
+                                                <label for="ApplicationUserFirstName" class="form-label">@((MarkupString)Constants.ApplicationLabelFirstName)</label>
+                                                <input type="text" class="form-control" id="ApplicationUserFirstName" @bind=_applicationUser.FirstName>
+                                            </div>
+                                            <div class="mb-3">
+                                                <span class="text-danger">*</span>
+                                                <label for="ApplicationUserLastName" class="form-label">@((MarkupString)Constants.ApplicationLabelLastName)</label>
+                                                <input type="text" class="form-control" id="ApplicationUserLastName" @bind=_applicationUser.LastName>
+                                            </div>
+
+                                            <div class="mb-3">
+                                                <label for="ApplicationUserCellPhone" class="form-label">@((MarkupString)Constants.ApplicationLabelCellPhone)</label>
+                                                <InternationalPhoneNumber Id="ApplicationUserCellPhone" Class="form-control" @bind-BindingValue="_applicationUser.CellPhoneNumber"></InternationalPhoneNumber>
+                                            </div>
+                                            <div class="form-check mb-3">
+                                                @if (_applicationUser.CanRecieveSMS)
+                                                {
+                                                    <input class="form-check-input" type="checkbox" aria-label="Checkbox for following text input" id="CanReceiveSMS" checked
+                                                           @bind-value="_applicationUser.CanRecieveSMS"> <label class="form-check-label" for="CanReceiveSMS">@Constants.ApplicationLabelCanReceiveSms</label>
+                                                }
+                                                else
+                                                {
+                                                    <input class="form-check-input" type="checkbox" aria-label="Checkbox for following text input" id="CanReceiveSMS"
+                                                           @bind-value="_applicationUser.CanRecieveSMS"> <label class="form-check-label" for="CanReceiveSMS">@Constants.ApplicationLabelCanReceiveSms</label>
+                                                }
+                                            </div>
+                                            <div class="mb-3">
+                                                <span class="text-danger">*</span>
+                                                <label for="ApplicationUserEmailAddress" class="form-label">@((MarkupString)Constants.ApplicationLabelEmailAddress)</label>
+                                                <input type="email" class="form-control" id="ApplicationUserEmailAddress" @bind=_applicationUser.EmailAddress>
+                                            </div>
+
+                                        </div>
+                                        <div class="col">
+                                            <div class="row mb-3">
+                                                <div class="col w-100 d-flex justify-content-center mb-3">
+                                                    <div class="person-photo-container">
+                                                        <img src="@_personImage" class="person-fullsize-img" />
+                                                    </div>
+
+                                                </div>
+                                                <div class="row mb-3 justify-content-center">
+                                                    <label for="PhotoUpload" class="btn btn-primary btn-photo-upload"> @((MarkupString)Constants.ApplicationLabelAddImage)</label>
+                                                </div>
+                                                <InputFile id="PhotoUpload" class="FileInputCustom" OnChange="@OnImageChangeAsync" @ref="_inputFile" />
+
+                                            </div>
+         
+                                        </div>
+                                    </div>
+                                    <div class="min-result-area">
+
+                                        <h5>Points History</h5>
+                                        <table class="table leaderboard">
+                                            <thead>
+                                                <tr>
+                                                    <th>Entry Reference</th>
+                                                    <th>Points</th>
+                                                    <th>Metric</th>
+                                                    <th>Date</th>
+                                                    <th></th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @if (ApplicationSessionViewModel.User != null
+                                               && ApplicationSessionViewModel.User.CoderPointTracking.Any())
+                                                {
+                                                    @foreach (var coderPointTracking in ApplicationSessionViewModel.User.CoderPointTracking.OrderByDescending(r => r.CreatedDate))
+                                                    {
+                                                        <tr>
+                                                            <td>
+                                                                @coderPointTracking.EntryReference
+                                                            </td>
+                                                            <td>
+                                                                @coderPointTracking.Points
+                                                            </td>
+                                                            <td>
+                                                                @GetMetricDescription(coderPointTracking.CoderPointMetricId)
+                                                            </td>
+                                                            <td>
+                                                                @coderPointTracking.CreatedDate.ToShortDateString()
+                                                            </td>
+                                                        </tr>
+                                                    }
+                                                }
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+
+                                <div class="card-footer d-flex justify-content-end">
+                                    <button class="btn btn-primary uniform-btn-width me-3" type="submit">@Constants.ApplicationLabelSave</button>
+                                </div>
+                            </EditForm>
+                        </div>
+                    </div>
+                }
+
+            </div>
+            <div class="leaderboard-right hide-on-mobile">
+                <div class="alert alert-info mb-3">
+                    <strong><a href="/OrganizationMetric">My Organization's Metrics</a></strong>
+                    <p>
+                        See the metrics used to evaluate your code
+                    </p>
+                </div>
+
+                <div class="alert alert-info mb-3">
+                    <strong><a href="/CodeMetrics">What makes good code?</a></strong>
+                    <p>
+                        Read best practices when writing great code
+                    </p>
+                </div>
+            </div>
+        </div>
+    </Authorized>
+    <NotAuthorized>
+        @{
+            NavigationManager.NavigateTo("/");
+        }
+    </NotAuthorized>
+</Microsoft.AspNetCore.Components.Authorization.AuthorizeView>
+
+
+

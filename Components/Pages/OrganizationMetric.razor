@@ -1,0 +1,46 @@
+﻿@page "/OrganizationMetric"
+@using CodersCupAward.Helper
+
+
+
+<Microsoft.AspNetCore.Components.Authorization.AuthorizeView Context="AuthenticationContext">
+    <Authorized>
+
+        
+        <div class="leaderboard-container">
+            <div class="leaderboard-left">
+                <h1>Code Metrics for @ApplicationSessionViewModel.User.Organization.OrganizationName</h1>
+                @foreach (var coderPointMetric in _coderPointsMetricList)
+                {
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <div class="message-row-container">
+                                <label>@Constants.ApplicationLabelLastName:</label>@coderPointMetric.MetricDescription
+                            </div>
+                                                      
+                        </div>
+                    </div>
+                }
+
+            </div>
+            <div class="leaderboard-right hide-on-mobile">
+                
+
+                <div class="alert alert-info mb-3">
+                    <strong><a href="/CodeMetrics">What makes good code?</a></strong>
+                    <p>
+                        Read best practices when writing great code
+                    </p>
+                </div>
+            </div>
+        </div>
+    </Authorized>
+    <NotAuthorized>
+        @{
+            NavigationManager.NavigateTo("/");
+        }
+    </NotAuthorized>
+</Microsoft.AspNetCore.Components.Authorization.AuthorizeView>
+
+
+

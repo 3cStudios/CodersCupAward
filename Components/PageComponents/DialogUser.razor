@@ -1,0 +1,112 @@
+﻿@using CodersCupAward.Extensions
+@using CodersCupAward.Helper
+@using CodersCupAward.ViewModels
+@using Microsoft.AspNetCore.Components.Authorization
+
+
+<div class="modal @ModalClass fourthModal" tabindex="-1" role="dialog" style="display:@ModalDisplay"
+     @onkeyup="EscapeKeyCloses">
+
+    <div class="modal-dialog">
+        <div class="modal-content user-dialog">
+            <div class="modal-header">
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" @onclick="CloseDialog"></button>
+            </div>
+            <div class="modal-body">
+                <div class="user-content">
+                    @if (ApplicationSessionViewModel.User != null)
+                    {
+                        <div class="UserInitial">
+                            <img src="@GetUserImage()" />
+
+                        </div>
+                        <div class="userInfo-name">
+                            <label class="form-label">@ApplicationSessionViewModel.User.FullName()</label>
+                        </div>
+                        <div class="userInfo-email">
+                            <span>@ApplicationSessionViewModel.User.EmailAddress</span>
+                        </div>
+                        <div class="userInfo-email">
+                            <a class="display-clickable " @onclick="NavigateToMyProfile">Manage My Profile</a>
+                        </div>
+                    }
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary float-end me-3 uniform-btn-width" type="button" @onclick="SignOut">@Constants.ApplicationLabelSignOut</button>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+@if (ShowBackdrop)
+{
+    <div class="modal-backdrop fourthModalBackground fade show"></div>
+}
+
+@code {
+    [Inject] public NavigationManager NavigationManager { get; set; }
+    [Inject] private ITranslationLayerHelper TranslationLayerHelper { get; set; }
+    [Inject] private AuthenticationStateProvider AuthenticationStateProvider { get; set; }
+
+    [CascadingParameter] public ApplicationSessionViewModel ApplicationSessionViewModel { get; set; }
+
+
+    public string ModalDisplay = "none;";
+    public string ModalClass = "";
+    public bool ShowBackdrop = false;
+    public void Open()
+    {
+        ModalDisplay = "block;";
+        ModalClass = "Show";
+        ShowBackdrop = true;
+        StateHasChanged();
+    }
+    private void CloseDialog()
+    {
+        ModalDisplay = "none";
+        ModalClass = "";
+        ShowBackdrop = false;
+        StateHasChanged();
+    }
+    private void SignOut()
+    {
+        ((CustomAuthenticationStateProvider)AuthenticationStateProvider).MarkUserAsLoggedOut();
+        CloseDialog();
+        NavigationManager.NavigateTo("/");
+
+    }
+    private string GetUserImage()
+    {
+        if (ApplicationSessionViewModel.User != null
+            && ApplicationSessionViewModel.User.ApplicationUserPhoto.Any())
+        {
+            return ApplicationSessionViewModel.User.ApplicationUserPhoto.First().Photo;
+        }
+        return Constants.MissingProfileImage;
+    }
+
+    private void EscapeKeyCloses(KeyboardEventArgs e)
+    {
+        if (e.Key == "Escape")
+        {
+            CloseDialog();
+        }
+    }
+    private void BackgroundClicked()
+    {
+        CloseDialog();
+    }
+    private void DialogClicked()
+    {
+        // Prevents the backgroundClicked event from firing
+
+    }
+    private void NavigateToMyProfile()
+    {
+        CloseDialog();
+        NavigationManager.NavigateTo("/MyProfile");
+    }
+    
+}

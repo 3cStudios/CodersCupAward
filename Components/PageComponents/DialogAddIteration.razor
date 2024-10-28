@@ -1,0 +1,96 @@
+﻿@using CodersCupAward.Extensions
+@using CodersCupAward.Helper
+@using CodersCupAward.Models
+@using CodersCupAward.ViewModels
+
+
+
+<div class="modal @ModalClass fourthModal" tabindex="-1" role="dialog" style="display:@ModalDisplay">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Iteration</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" @onclick="CloseDialog"></button>
+            </div>
+            <div class="modal-body">
+                <div class="card">
+                    <EditForm Model="@_iteration" OnSubmit="SaveForm">
+                        <div class="card-body">
+
+                            <div class="mb-3">
+                                <label for="MetricDescription" class="form-label">@Constants.ApplicationLabelIterationName</label>
+                                <input type="text" class="form-control" id="MetricDescription" @bind="_iteration.Name">
+                            </div>
+                            <div class="mb-3">
+                                <label for="StartDate" class="form-label">@Constants.ApplicationLabelStartDate</label>
+                                <input type="date" class="form-control" id="StartDate" @bind="_iteration.StartDate">
+                            </div>
+                            <div class="mb-3">
+                                <label for="EndDate" class="form-label">@Constants.ApplicationLabelEndDate</label>
+                                <input type="date" class="form-control" id="EndDate" @bind="_iteration.EndDate">
+                            </div>
+                        </div>
+                        <div class="card-footer d-flex justify-content-end">
+                            <button class="btn btn-primary uniform-btn-width me-3" type="submit">@Constants.ApplicationLabelSave</button>
+                        </div>
+                    </EditForm>
+                </div>
+
+              
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+@if (ShowBackdrop)
+{
+    <div class="modal-backdrop fourthModalBackground fade show"></div>
+}
+@code {
+
+
+    [Inject] private ITranslationLayerHelper TranslationLayerHelper { get; set; }
+    [Inject] private IIterationHelper IterationHelper { get; set; }
+
+    [CascadingParameter] public ApplicationSessionViewModel ApplicationSessionViewModel { get; set; }
+    [Parameter] public EventCallback OnSave { get; set; }
+
+    private Iteration _iteration = new();
+
+    public string ModalDisplay = "none;";
+    public string ModalClass = "";
+    public bool ShowBackdrop = false;
+
+    public void ShowDialog(Iteration iteration)
+    {
+        _iteration = iteration;
+        ModalDisplay = "block;";
+        ModalClass = "Show";
+        ShowBackdrop = true;
+        StateHasChanged();
+    }
+
+    private void CloseDialog()
+    {
+        ModalDisplay = "none";
+        ModalClass = "";
+        ShowBackdrop = false;
+        StateHasChanged();
+    }
+
+   
+    private async Task SaveForm()
+    {
+        _iteration.CreatedDate = DateTime.UtcNow;
+        _iteration.CreatedBy = ApplicationSessionViewModel.User.FullName();
+        _iteration.OrganizationId = ApplicationSessionViewModel.User.OrganizationId;
+        await IterationHelper.SaveAsync(_iteration);
+        await OnSave.InvokeAsync();
+        CloseDialog();
+    }
+
+
+}

@@ -1,0 +1,144 @@
+﻿@page "/CoachAddPoints"
+@using CodersCupAward.Extensions
+@using CodersCupAward.Helper
+
+
+<Microsoft.AspNetCore.Components.Authorization.AuthorizeView Context="AuthenticationContext" Roles="Coach">
+    <Authorized>
+        <CoachesNavigation></CoachesNavigation>
+
+
+        <div class="container">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="user-profile-small-w-info">
+                            <div class="user-profile-small">
+                                <img src="@GetUserImage()" />
+                            </div>
+                            <div class="user-profile-small-name">
+                                @ApplicationSessionViewModel.EditUser.FullName()
+                            </div>
+                        </div>
+                    </div>
+                    <div class="right-block hide-on-mobile">
+                        <div class="alert alert-info">
+                            <p>
+                                <strong>Automatic Notification</strong><br />
+                                When you add points to a team member they automatically receive an email notification
+                                with a leaderboard update.
+                            </p>
+
+
+                        </div>
+                    </div>
+
+                    <div class="left-block">
+                        <DialogConfirm @ref="_dialogConfirm" ModalResult="OnDeleteConfirmation"></DialogConfirm>
+
+                        <div class="card">
+                            <EditForm Model="@_coderPointTracking" OnSubmit="SavePoints">
+                                <div class="card-body">
+
+                                    <div class="mb-3">
+                                        <label for="IterationId" class="form-label">@((MarkupString)Constants.ApplicationLabelIteration)</label>
+                                        <select class="form-select" id="IterationId" @bind="_coderPointTracking.IterationId">
+                                            @foreach (var iteration in iterationList)
+                                            {
+                                                if (iteration.IterationId == _selectedIteration.IterationId)
+                                                {
+                                                    <option value="@iteration.IterationId" selected>@iteration.Name</option>
+                                                }
+                                                else
+                                                {
+                                                    <option value="@iteration.IterationId">@iteration.Name</option>
+                                                }
+
+                                            }
+                                        </select>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="EntryReference" class="form-label"><span class="required">*</span> Entry Reference</label>
+                                        <input type="text" class="form-control" id="EntryReference" @bind="_coderPointTracking.EntryReference" required>
+                                    </div>
+                                    @foreach (var coderPointMetric in _coderPointMetrics)
+                                    {
+                                        <div class="mb-3">
+                                            <div class="alert alert-info">
+                                                <label class="form-label">@((MarkupString)Constants.ApplicationLabelMetric)</label>
+                                                @coderPointMetric.MetricDescription
+                                            </div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="@coderPointMetric.CoderPointMetricId" class="form-label">Points</label>
+                                            <input type="text" class="form-control" id="@coderPointMetric.CoderPointMetricId"
+                                                   onwheel="return false;"
+                                            @onchange="@(e => OnInputChange(e, coderPointMetric.CoderPointMetricId))">
+                                        </div>
+                                    }
+                                </div>
+                                <div class="card-footer d-flex justify-content-end">
+                                    <button class="btn btn-primary uniform-btn-width me-3" type="submit">@Constants.ApplicationLabelSave</button>
+                                </div>
+                            </EditForm>
+                        </div>
+
+
+                    </div>
+                </div>
+            </div>
+
+
+
+            <h5>Points History</h5>
+
+            <table class="table leaderboard">
+                <thead>
+                    <tr>
+                        <th>Entry Reference</th>
+                        <th>Points</th>
+                        <th>Metric</th>
+                        <th>Date</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (ApplicationSessionViewModel.EditUser != null
+                    && ApplicationSessionViewModel.EditUser.CoderPointTracking.Any())
+                    {
+                        @foreach (var coderPointTracking in ApplicationSessionViewModel.EditUser.CoderPointTracking.OrderByDescending(r => r.CreatedDate))
+                        {
+                            <tr>
+                                <td>
+                                    @coderPointTracking.EntryReference
+                                </td>
+                                <td>
+                                    @coderPointTracking.Points
+                                </td>
+                                <td>
+                                    @GetMetricDescription(coderPointTracking.CoderPointMetricId)
+                                </td>
+                                <td>
+                                    @coderPointTracking.CreatedDate.ToShortDateString()
+                                </td>
+                                <td>
+                                    <button class="btn btn-secondary mb-3 me-2 float-end btn-nav-bar" type="button"
+                                            @onclick="()=> DeletePoints(coderPointTracking)">
+                                        Delete
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+
+        </div>
+    </Authorized>
+    <NotAuthorized>
+        @{
+            NavigationManager.NavigateTo("/");
+        }
+    </NotAuthorized>
+</Microsoft.AspNetCore.Components.Authorization.AuthorizeView>
+

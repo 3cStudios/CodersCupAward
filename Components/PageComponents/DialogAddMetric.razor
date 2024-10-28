@@ -1,0 +1,94 @@
+﻿@using CodersCupAward.Extensions
+@using CodersCupAward.Helper
+@using CodersCupAward.Models
+@using CodersCupAward.ViewModels
+
+
+
+<div class="modal @ModalClass fourthModal" tabindex="-1" role="dialog" style="display:@ModalDisplay">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Metric</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" @onclick="CloseDialog"></button>
+            </div>
+            <div class="modal-body">
+                <div class="card">
+                    <EditForm Model="@_coderPointMetric" OnSubmit="SaveMetric">
+                        <div class="card-body">
+
+                            <div class="mb-3">
+                                <label for="MetricDescription" class="form-label">@Constants.ApplicationLabelMetricDescription</label>
+                                <input type="text" class="form-control" id="MetricDescription" @bind="_coderPointMetric.MetricDescription">
+                            </div>
+                            
+                        </div>
+                        <div class="card-footer d-flex justify-content-end">
+                            <button class="btn btn-primary uniform-btn-width me-3" type="submit">@Constants.ApplicationLabelSave</button>
+                        </div>
+                    </EditForm>
+                </div>
+
+              
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+@if (ShowBackdrop)
+{
+    <div class="modal-backdrop fourthModalBackground fade show"></div>
+}
+@code {
+
+
+    [Inject] private ITranslationLayerHelper TranslationLayerHelper { get; set; }
+    [Inject] private ICoderPointMetricHelper CoderPointMetricHelper { get; set; }
+
+    [CascadingParameter] public ApplicationSessionViewModel ApplicationSessionViewModel { get; set; }
+    [Parameter] public EventCallback OnSave { get; set; }
+
+    private CoderPointMetric _coderPointMetric = new();
+
+    public string ModalDisplay = "none;";
+    public string ModalClass = "";
+    public bool ShowBackdrop = false;
+
+    public void ShowDialog(CoderPointMetric coderPointMetric)
+    {
+        _coderPointMetric = coderPointMetric;
+        ModalDisplay = "block;";
+        ModalClass = "Show";
+        ShowBackdrop = true;
+        StateHasChanged();
+    }
+
+    private void CloseDialog()
+    {
+        ModalDisplay = "none";
+        ModalClass = "";
+        ShowBackdrop = false;
+        StateHasChanged();
+    }
+
+    private async Task DeleteMetric(CoderPointMetric coderPointMetric)
+    {
+        await CoderPointMetricHelper.DeleteAsync(coderPointMetric);
+        StateHasChanged();
+    }
+
+    private async Task SaveMetric()
+    {
+        _coderPointMetric.CreatedDate = DateTime.Now;
+        _coderPointMetric.CreatedBy = ApplicationSessionViewModel.User.FullName();
+        _coderPointMetric.OrganizationId = ApplicationSessionViewModel.User.OrganizationId;
+        await CoderPointMetricHelper.SaveAsync(_coderPointMetric);
+        await OnSave.InvokeAsync();
+        CloseDialog();
+    }
+
+
+}

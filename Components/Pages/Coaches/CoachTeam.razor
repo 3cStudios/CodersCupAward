@@ -1,0 +1,91 @@
+﻿@page "/CoachTeam"
+@using CodersCupAward.Helper
+
+
+<Microsoft.AspNetCore.Components.Authorization.AuthorizeView Context="AuthenticationContext" Roles="Coach">
+    <Authorized>
+        <CoachesNavigation></CoachesNavigation>
+        <DialogConfirm @ref="_dialogConfirm" ModalResult="OnDeleteConfirmation"></DialogConfirm>
+        <div class="container">
+        <div class="card">
+            <div class="card-body">
+                
+                    <div class="right-block hide-on-mobile">
+                        <div class="alert alert-info">
+                            <p>
+                                <strong>Automatic Invitation</strong><br />
+                                When you add a team member an email invitation is sent to them. 
+                                They will need to accept the invitation to be able to participate in the team.
+                                As part of the acceptance they will create their own password.
+                            </p>
+                            <p>
+                                <strong>Automatic Login</strong><br />
+                                Once the team member creates their password their setup is complete. We create
+                                a cookie to automatically log them in each time to reduce friction and 
+                                hopefully make it easy to visit the leaderboard more frequently.
+                            </p>
+                            
+                        </div>
+                    </div>
+                
+                <div class="left-block">
+                <button class="btn btn-primary mb-3 btn-nav-bar" type="button" @onclick="AddTeamMember">@Constants.ApplicationLabelAdd</button>
+                @foreach (var applicationUser in applicationUsersList)
+                {
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <div class="profile-image-container">
+                                @if (applicationUser.ApplicationUserPhoto.Any())
+                                {
+                                    <img src="@applicationUser.ApplicationUserPhoto.First().Photo" />
+                                }
+
+                            </div>
+                            <div class="profile-information-container">
+                                <div class="message-row-container">
+                                    <label>@Constants.ApplicationLabelIdentifier:</label> @applicationUser.ApplicationUserId
+                                </div>
+                                <div class="message-row-container">
+                                    <label>@Constants.ApplicationLabelLastName:</label>@applicationUser.FirstName @applicationUser.LastName
+                                </div>
+                                @if (applicationUser.ApplicationUserRole.Any())
+                                {
+                                    <div class="message-row-container">
+                                        <label>@Constants.ApplicationLabelRole:</label>@applicationUser.ApplicationUserRole.First().ApplicationRoles.Description
+                                    </div>
+                                }
+                                <div class="message-row-container">
+                                    <label>@Constants.ApplicationLabelEmailAddress:</label>@applicationUser.EmailAddress
+                                </div>
+
+                                <div class="message-row-container">
+                                    <label>@Constants.ApplicationLabelCellPhone:</label>@applicationUser.CellPhoneNumber
+                                </div>
+
+                            </div>
+                            <div class="row-button-container">
+
+                                <button class="btn btn-primary mb-3 me-2 float-end btn-nav-bar" type="button"
+                                        @onclick="()=> EditTeamMember(applicationUser)">
+                                    @Constants.ApplicationLabelEdit
+                                </button>
+                                        <button class="btn btn-secondary mb-3 me-2 float-end btn-nav-bar" type="button"
+                                                @onclick="()=> DeleteTeamMember(applicationUser)">
+                                            @Constants.ApplicationLabelDelete
+                                        </button>
+
+                            </div>
+                        </div>
+                    </div>
+                }
+                </div>
+            </div>
+        </div>
+        </div>
+    </Authorized>
+    <NotAuthorized>
+        @{
+            NavigationManager.NavigateTo("/");
+        }
+    </NotAuthorized>
+</Microsoft.AspNetCore.Components.Authorization.AuthorizeView>

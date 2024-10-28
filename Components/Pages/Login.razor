@@ -1,0 +1,143 @@
+﻿@page "/Login"
+@using CodersCupAward.Helper
+@using CodersCupAward.Models
+@using CodersCupAward.ViewModels
+@using Microsoft.AspNetCore.Components.Authorization
+
+@if (_showWait)
+{
+    <WaitState WaitTitle="@Constants.ApplicationLabelPleaseWait"
+               WaitMessage="@Constants.ApplicationLabelPleaseWaitProcessing" />
+}
+else
+{
+
+    <div class="container">
+
+        <div class="card login-form">
+            <EditForm Model="@_loginModel" OnSubmit="LoginUser">
+                <div class="card-body">
+                    <div class="alert alert-info mb-3">
+                        Please login to access your team
+                    </div>
+
+                    <div class="mb-3">
+                        <input class="form-control me-2" type="text" placeholder="Email Address" aria-label="Email Address" @bind="_loginModel.EmailAddress">
+                    </div>
+                    <div class="mb-3">
+                        <div class="input-group">
+                            <input id="password" type="@InputType" placeholder="password" aria-label="password" @bind="_loginModel.Password" class="form-control" />
+                            <span class="input-group-text" @onclick="TogglePasswordVisibility" style="cursor:pointer;">
+                                <i style="font-size: 1.2em;" class="bi @(_showPassword ? "bi-eye-slash" : "bi-eye")"></i>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-end mt-3 mb-3">
+                        <button class="btn btn-primary ms-2" type="submit">Login</button>
+                    </div>
+                </div>
+
+            </EditForm>
+        </div>
+    </div>
+}
+
+
+@code {
+
+
+    [Inject] private AuthenticationStateProvider AuthenticationStateProvider { get; set; }
+    [Inject] private NavigationManager NavigationManager { get; set; }
+    [Inject] private IApplicationUserHelper ApplicationUserHelper { get; set; }
+    [Inject] private IApplicationSessionHelper ApplicationSessionHelper { get; set; }
+    [Inject] private IToastService ToastService { get; set; }
+    [Inject] private ISecurityHelper SecurityHelper { get; set; }
+
+    [CascadingParameter] public ApplicationSessionViewModel ApplicationSessionViewModel { get; set; }
+
+    private bool _showPassword;
+    private LoginModel _loginModel = new();
+    private string InputType => _showPassword ? "text" : "password";
+    private bool _showWait;
+    private int _loginAttempts = 0;
+
+    [Parameter] public EventCallback<LoginModel> OnLoginUser { get; set; }
+
+    private void TogglePasswordVisibility()
+    {
+        _showPassword = !_showPassword;
+    }
+
+
+    private async Task LoginUser()
+    {
+        _showWait = true;
+
+        const int maxRetryAttempts = 5;
+        const int delayBetweenRetries = 3000; // in milliseconds
+        var attempt = 0;
+
+        while (attempt < maxRetryAttempts)
+        {
+            try
+            {
+                var user = await AuthenticateUser();
+                if (user != null && user.ApplicationUserUniqueId != Guid.Empty)
+                {
+                    ((CustomAuthenticationStateProvider)AuthenticationStateProvider).MarkUserAsAuthenticated(user);
+                    ApplicationSessionViewModel.User = user;
+                    await ApplicationSessionHelper.TrackSession(ApplicationSessionViewModel);
+                    await SecurityHelper.SetRememberMeTokenAsync(user);
+
+                    if (!string.IsNullOrEmpty(ApplicationSessionViewModel.RequestedUrl))
+                    {
+                        NavigationManager.NavigateTo(ApplicationSessionViewModel.RequestedUrl);
+                        break; // Exit the loop if login is successful
+                    }
+
+                    if (ApplicationSessionViewModel.User.ApplicationUserRole.First().ApplicationRolesId == Constants.CoachRoleId
+                    && !ApplicationSessionViewModel.User.Organization.IsSetupComplete)
+                    {
+                        _showWait = false;
+                        NavigationManager.NavigateTo("/CoachHome");
+                        break; // Exit the loop if login is successful
+
+                    }
+                    _showWait = false;
+                    NavigationManager.NavigateTo("/LeaderBoard");
+                    break; // Exit the loop if login is successful
+                }
+                _showWait = false;
+                if (_loginAttempts >= 3)
+                {
+                    NavigationManager.NavigateTo("/IdontRememberMyPassword");
+                    break; // Exit the loop if login is successful
+                }
+                ToastService.ShowError("Invalid email address or password");
+                _loginAttempts++;
+                break; // Exit the loop if login is successful
+
+            }
+            catch
+            {
+                attempt++;
+                if (attempt >= maxRetryAttempts)
+                {
+                    NavigationManager.NavigateTo("/", true);
+                }
+                System.Threading.Thread.Sleep(delayBetweenRetries); // Wait before retrying
+            }
+
+        }
+
+
+
+    }
+
+    private async Task<ApplicationUser> AuthenticateUser()
+    {
+        return await ApplicationUserHelper.Login(_loginModel);
+    }
+
+
+}

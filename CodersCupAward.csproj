@@ -1,0 +1,77 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <NoWarn>1701;1702;CS8618;BL0007</NoWarn>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <NoWarn>1701;1702;CS8618;BL0007</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="Components\Pages\Coaches\CoachIterations.razor" />
+    <None Include="Components\Pages\Coaches\CoachEditTeamMember.razor" />
+    <None Include="Components\Pages\Coaches\CoachPoints.razor" />
+    <None Include="Components\Pages\Coaches\CoachTeam.razor" />
+    <None Include="Components\Pages\Coaches\CoachDefineMetrics.razor" />
+    <None Include="Components\Pages\Coaches\CoachOrganization.razor" />
+    <None Include="Components\Pages\Coaches\CoachHome.razor" />
+    <None Include="efpt.config.json.user" />
+    <None Include="wwwroot\css\bootstrap\bootstrap-grid.css.map" />
+    <None Include="wwwroot\css\bootstrap\bootstrap-grid.min.css.map" />
+    <None Include="wwwroot\css\bootstrap\bootstrap-grid.rtl.css.map" />
+    <None Include="wwwroot\css\bootstrap\bootstrap-grid.rtl.min.css.map" />
+    <None Include="wwwroot\css\bootstrap\bootstrap-reboot.css.map" />
+    <None Include="wwwroot\css\bootstrap\bootstrap-reboot.min.css.map" />
+    <None Include="wwwroot\css\bootstrap\bootstrap-reboot.rtl.css.map" />
+    <None Include="wwwroot\css\bootstrap\bootstrap-reboot.rtl.min.css.map" />
+    <None Include="wwwroot\css\bootstrap\bootstrap-utilities.css.map" />
+    <None Include="wwwroot\css\bootstrap\bootstrap-utilities.min.css.map" />
+    <None Include="wwwroot\css\bootstrap\bootstrap-utilities.rtl.css.map" />
+    <None Include="wwwroot\css\bootstrap\bootstrap-utilities.rtl.min.css.map" />
+    <None Include="wwwroot\css\bootstrap\bootstrap.css.map" />
+    <None Include="wwwroot\css\bootstrap\bootstrap.min.css.map" />
+    <None Include="wwwroot\css\bootstrap\bootstrap.rtl.css.map" />
+    <None Include="wwwroot\css\bootstrap\bootstrap.rtl.min.css.map" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Authentication" Version="2.2.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Authorization" Version="8.0.7" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.7" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.7" />
+    <PackageReference Include="Blazored.Toast" Version="4.1.0" />
+    <PackageReference Include="Microsoft.Azure.AppConfiguration.AspNetCore" Version="7.3.0" />
+    <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.22.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="SendGrid" Version="9.29.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Update="Components\PageComponents\DialogLogin.razor">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+    </Content>
+    <Content Update="Components\Pages\Login.razor">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+    </Content>
+    <Content Update="Components\Pages\OrganizationMetric.razor">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+    </Content>
+    <Content Update="Components\Pages\Registration\RegisterEmailSentForJoinVerification.razor">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+    </Content>
+    <Content Update="Components\Pages\Registration\RegisterUserCheckFailed.razor">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+    </Content>
+    <Content Update="Components\Pages\Registration\RegisterOrganizationCheck.razor">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+    </Content>
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,43 @@
+﻿@page "/"
+
+@using CodersCupAward.ViewModels
+
+<PageTitle>Track and Reward Best Practices - Coders Cup Award</PageTitle>
+
+<section id="home" class="hero-class">
+    <div class="hero-definition-text">
+        <div class="hero-text-center">
+            <h1>Track and Reward Best Practices</h1>
+            <div class="hero-centers-list">
+                <ul>
+                    <li>Register</li>
+                    <li>Invite Your Team</li>
+                    <li>Reward Best Practices</li>
+                </ul>
+            </div>
+            <div class="hero-centers-cta">
+                <p>
+                    What is measured can improve
+                </p>
+                <div class="hero-centers-trial-cta">
+                    <a href="/RegisterUser">Register</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="hero-image">
+        <div class="hero-image-center">
+            <img src="/images/hero-graphic.png" alt="a coder working hard and has the coders cup award" />
+        </div>
+    </div>
+</section>
+
+@code {
+
+    
+    
+    [CascadingParameter]
+    public ApplicationSessionViewModel? UserSession { get; set; }
+
+    
+}

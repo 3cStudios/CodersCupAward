@@ -1,0 +1,364 @@
+﻿@using Blazored.Toast.Configuration
+@using CodersCupAward.Helper
+@using CodersCupAward.Models
+@using CodersCupAward.ViewModels
+@using Microsoft.AspNetCore.Components.Authorization
+
+
+@inherits LayoutComponentBase
+
+<BlazoredToasts Position="ToastPosition.TopRight"
+                Timeout="20"
+                IconType="IconType.FontAwesome"
+                SuccessIcon="fa fa-thumbs-up"
+                ErrorIcon="fa fa-bug" />
+
+
+<DialogUser @ref="_dialogUser"></DialogUser>
+<DialogLogin @ref="_dialogLogin" OnLoginUser="MobileLogin"></DialogLogin>
+<div class="page">
+    <main>
+        <nav class="navbar navbar-expand-lg bg-body-tertiary  nav-add-boxshadow">
+            <div class="container-fluid">
+                <a class="navbar-brand display-link" @onclick="NavigateHome">
+                    <img Id="PersonalizedLogo" src="/images/logo.png" alt="" class="img-fluid logo-set-size">
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav">
+                        <Microsoft.AspNetCore.Components.Authorization.AuthorizeView Context="authenticationContext">
+                            <Authorized>
+                                <li class="nav-item primary-nav-effect">
+                                    <a class="nav-link primary-nav-menu-item " @onclick="NavigateHome">Home</a>
+                                </li>
+                                <li class="nav-item  primary-nav-effect">
+                                    <a class="nav-link primary-nav-menu-item" @onclick="NavigateToLeaderBoard">Leaderboard</a>
+                                </li>
+                                <li class="nav-item primary-nav-effect">
+                                    <a class="nav-link primary-nav-menu-item " @onclick="NavigateToMetrics">Metrics</a>
+                                </li>
+                                <AuthorizeView Roles="Coach" Context="innerContext">
+                                    <li class="nav-item primary-nav-effect">
+                                        <a class="nav-link primary-nav-menu-item" @onclick="NavigateToCoachesHome">Coaches</a>
+                                    </li>
+                                </AuthorizeView>
+                                <li class="nav-item  show-on-mobile">
+                                    <a class="nav-link primary-nav-menu-item" @onclick="NavigateToMyProfile">Manage My Profile</a>
+                                </li>
+                                <li class="nav-item  show-on-mobile">
+                                    <a class="nav-link primary-nav-menu-item" @onclick="LogOutUser">Sign Out</a>
+                                </li>
+                            </Authorized>
+                            <NotAuthorized>
+                                <li class="nav-item show-on-mobile">
+                                    <a class="nav-link primary-nav-menu-item" @onclick="NavigateToLogin">Login</a>
+                                </li>
+                            </NotAuthorized>
+                        </Microsoft.AspNetCore.Components.Authorization.AuthorizeView>
+                    </ul>
+                    <div class="ms-auto hide-on-mobile">
+                        <Microsoft.AspNetCore.Components.Authorization.AuthorizeView Context="authenticationContext">
+                            <Authorized>
+                                <div class="primary-menu-sign-out" @onclick="ShowUserDialog">
+                                    <img src="@GetUserImage()" />
+                                </div>
+                            </Authorized>
+                            <NotAuthorized>
+                                <EditForm class="d-flex" Model="@_loginModel" OnSubmit="LoginUser">
+                                    <input class="form-control me-2" type="text" placeholder="Email Address" aria-label="Email Address" @bind="_loginModel.EmailAddress">
+                                    <div class="input-group">
+                                        <input id="password" type="@InputType" placeholder="password" aria-label="password" @bind="_loginModel.Password" class="form-control" />
+                                        <span class="input-group-text" @onclick="TogglePasswordVisibility" style="cursor:pointer;">
+                                            <i style="font-size: 1.2em;" class="bi @(_showPassword ? "bi-eye-slash" : "bi-eye")"></i>
+                                        </span>
+                                    </div>
+                                    <button class="btn btn-primary ms-2" type="submit">Login</button>
+                                </EditForm>
+                            </NotAuthorized>
+                        </Microsoft.AspNetCore.Components.Authorization.AuthorizeView>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <article class="content px-4 mt-3">
+            <div class="min-vh-100">
+                @if (_showWait)
+                {
+                    <WaitState WaitTitle="@Constants.ApplicationLabelPleaseWait"
+                               WaitMessage="@Constants.ApplicationLabelPleaseWaitProcessing" />
+                }
+                else
+                {
+                    @Body
+                }
+            </div>
+            <footer id="footer">
+                <ul>
+                    <li><a href="/PrivacyPolicy.html" target="_blank">Privacy Policy</a></li>
+                    <li><a href="/TermsOfUse.html" target="_blank">Terms of Use</a></li>
+                    <li><a href="/CookiePolicy.html" target="_blank">Cookie Policy</a></li>
+                    <li><a class="display-clickable" @onclick="NavigateToIdontRememberMyPassword">Forgot Password</a></li>
+                    <li><a class="display-clickable" @onclick="RemoveRememberMeTokenAsync">Forget Me</a></li>
+                    
+                </ul>
+            </footer>
+        </article>
+    </main>
+</div>
+<div id="blazor-error-ui">
+    An unhandled error has occurred.
+    <a href="" class="reload">Reload</a>
+    <a class="dismiss">🗙</a>
+</div>
+
+
+
+@code {
+
+
+    [Inject] private AuthenticationStateProvider AuthenticationStateProvider { get; set; }
+    [Inject] private NavigationManager NavigationManager { get; set; }
+    [Inject] private IApplicationUserHelper ApplicationUserHelper { get; set; }
+    [Inject] private IApplicationSessionHelper ApplicationSessionHelper { get; set; }
+    [Inject] private IToastService ToastService { get; set; }
+    [Inject] private ISecurityHelper SecurityHelper { get; set; }
+
+    [CascadingParameter] public ApplicationSessionViewModel ApplicationSessionViewModel { get; set; }
+
+    private bool _showPassword;
+    private bool _showWait;
+    private int _loginAttempts = 0;
+    private LoginModel _loginModel = new();
+    private string InputType => _showPassword ? "text" : "password";
+    private DialogUser _dialogUser;
+    private DialogLogin _dialogLogin;
+
+    private void TogglePasswordVisibility()
+    {
+        _showPassword = !_showPassword;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        _showWait = true;
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity is not null 
+            && !user.Identity.IsAuthenticated
+            && NavigationManager.Uri != NavigationManager.BaseUri
+            && ApplicationSessionViewModel.RequestedUrl != NavigationManager.Uri)
+        {
+            ApplicationSessionViewModel.RequestedUrl = NavigationManager.Uri;
+        }
+    }
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+            var user = authState.User;
+
+            if (user.Identity is not null && !user.Identity.IsAuthenticated)
+            {
+                var token = await SecurityHelper.GetRememberMeTokenAsync();
+                if (!string.IsNullOrEmpty(token))
+                {
+                    const int maxRetryAttempts = 5;
+                    const int delayBetweenRetries = 3000; // in milliseconds
+                    var attempt = 0;
+                    while (attempt < maxRetryAttempts)
+                    {
+                        try
+                        {
+                            var appUser = await ApplicationUserHelper.GetByUserUIdAsync(Guid.Parse(token));
+                            if (appUser != null && appUser.ApplicationUserUniqueId != Guid.Empty)
+                            {
+                                ((CustomAuthenticationStateProvider)AuthenticationStateProvider).MarkUserAsAuthenticated(appUser);
+                                ApplicationSessionViewModel.User = appUser;
+                                await ApplicationSessionHelper.TrackSession(ApplicationSessionViewModel);
+                                _showWait = false;
+                                if (!string.IsNullOrEmpty(ApplicationSessionViewModel.RequestedUrl))
+                                {
+                                    NavigationManager.NavigateTo(ApplicationSessionViewModel.RequestedUrl);
+                                }
+                                else if (ApplicationSessionViewModel.User.ApplicationUserRole.First().ApplicationRolesId == Constants.CoachRoleId
+                                    && !ApplicationSessionViewModel.User.Organization.IsSetupComplete)
+                                {
+                                    
+                                    NavigationManager.NavigateTo("/CoachHome");
+                                }
+                                else
+                                {
+                                    NavigationManager.NavigateTo("/LeaderBoard");    
+                                }
+                            }
+
+                            break;
+
+                        }
+                        catch
+                        {
+                            attempt++;
+                            if (attempt >= maxRetryAttempts)
+                            {
+                                NavigationManager.NavigateTo("/", true);
+                            }
+                            Thread.Sleep(delayBetweenRetries); // Wait before retrying
+                        }
+
+                    }
+                }
+                _showWait = false;
+                StateHasChanged();
+            }
+        }
+    }
+
+    private async Task MobileLogin(LoginModel loginModel)
+    {
+        _loginModel = loginModel;
+        await LoginUser();
+
+    }
+
+    private async Task LoginUser()
+    {
+        _showWait = true;
+
+        const int maxRetryAttempts = 5;
+        const int delayBetweenRetries = 3000; // in milliseconds
+        var attempt = 0;
+
+        while (attempt < maxRetryAttempts)
+        {
+            try
+            {
+                var user = await AuthenticateUser();
+                if (user != null && user.ApplicationUserUniqueId != Guid.Empty)
+                {
+                    ((CustomAuthenticationStateProvider)AuthenticationStateProvider).MarkUserAsAuthenticated(user);
+                    ApplicationSessionViewModel.User = user;
+                    await ApplicationSessionHelper.TrackSession(ApplicationSessionViewModel);
+                    await SecurityHelper.SetRememberMeTokenAsync(user);
+                    _dialogLogin.CloseDialog();
+                    if (ApplicationSessionViewModel.User.ApplicationUserRole.First().ApplicationRolesId == Constants.CoachRoleId
+                    && !ApplicationSessionViewModel.User.Organization.IsSetupComplete)
+                    {
+                        _showWait = false;
+                        NavigationManager.NavigateTo("/CoachHome");
+                        break; // Exit the loop if login is successful
+
+                    }
+                    _showWait = false;
+                    NavigationManager.NavigateTo("/LeaderBoard");
+                    break; // Exit the loop if login is successful
+                }
+                _showWait = false;
+                if (_loginAttempts >= 3)
+                {
+                    NavigationManager.NavigateTo("/IdontRememberMyPassword");
+                    break; // Exit the loop if login is successful
+                }
+                ToastService.ShowError("Invalid email address or password");
+                _loginAttempts++;
+                break; // Exit the loop if login is successful
+
+            }
+            catch
+            {
+                attempt++;
+                if (attempt >= maxRetryAttempts)
+                {
+                    NavigationManager.NavigateTo("/", true);
+                }
+                System.Threading.Thread.Sleep(delayBetweenRetries); // Wait before retrying
+            }
+
+        }
+
+
+
+    }
+
+    private async Task<ApplicationUser> AuthenticateUser()
+    {
+        return await ApplicationUserHelper.Login(_loginModel);
+    }
+
+    private void LogOutUser()
+    {
+        ((CustomAuthenticationStateProvider)AuthenticationStateProvider).MarkUserAsLoggedOut();
+        ApplicationSessionViewModel.User = null!;
+        NavigationManager.NavigateTo("/");
+    }
+
+    private void NavigateToLeaderBoard()
+    {
+        NavigationManager.NavigateTo("/LeaderBoard");
+    }
+
+    private void NavigateToMetrics()
+    {
+        NavigationManager.NavigateTo("/OrganizationMetric");
+    }
+
+    private async Task NavigateHome()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity is not null && user.Identity.IsAuthenticated)
+        {
+            NavigationManager.NavigateTo("/LeaderBoard");
+            return;
+        }
+
+        NavigationManager.NavigateTo("/");
+    }
+
+    private void NavigateToCoachesHome()
+    {
+        NavigationManager.NavigateTo("/CoachHome");
+    }
+
+    private string GetUserImage()
+    {
+        if (ApplicationSessionViewModel.User != null
+            && ApplicationSessionViewModel.User.ApplicationUserPhoto.Any())
+        {
+            return ApplicationSessionViewModel.User.ApplicationUserPhoto.First().Photo;
+        }
+        return Constants.MissingProfileImage;
+    }
+
+    private void ShowUserDialog()
+    {
+        _dialogUser.Open();
+    }
+
+    private void NavigateToMyProfile()
+    {
+        NavigationManager.NavigateTo("/MyProfile");
+    }
+
+    private void NavigateToLogin()
+    {
+        _dialogLogin.Show();
+    }
+
+    private async Task RemoveRememberMeTokenAsync()
+    {
+        await SecurityHelper.RemoveRememberMeTokenAsync();
+        ToastService.ShowSuccess("You are forgotten");
+    }
+
+    private void NavigateToIdontRememberMyPassword()
+    {
+        NavigationManager.NavigateTo("/IdontRememberMyPassword");
+    }
+
+}

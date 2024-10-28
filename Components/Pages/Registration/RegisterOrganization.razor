@@ -1,0 +1,48 @@
+﻿@page "/registerorganization"
+@using CodersCupAward.Helper
+
+@if (_showWait)
+{
+    <WaitState WaitTitle="@Constants.ApplicationLabelPleaseWait"
+               WaitMessage="@Constants.ApplicationLabelPleaseWaitProcessing" />
+}
+else
+{
+    <div class="container">
+        <div class="card mb-3">
+            <EditForm Model="@_organization" OnSubmit="SaveFormAsync">
+                <div class="card-body">
+                    <h1>Register Your Organization</h1>
+
+                    <div class="alert alert-info">
+                        We couldn't find your organization in our system. Please complete the form below to register your so that
+                        your team members can join the competition.
+                    </div>
+                    <div class="row row-cols-1 row-cols-md-2 g-4">
+                        <div class="col">
+                            <div class="mb-3">
+                                <span class="text-danger">*</span>
+                                <label for="OrganizationName" class="form-label">@((MarkupString)Constants.ApplicationLabelOrganizationName)</label>
+                                <input type="text" class="form-control" id="OrganizationName" @bind=_organization.OrganizationName>
+                            </div>
+                            <div class="mb-3">
+                                <span class="text-danger">*</span>
+                                <label for="DepartmentTeamName" class="form-label">@((MarkupString)Constants.ApplicationLabelDepartmentTeamName)</label>
+                                <input type="text" class="form-control" id="DepartmentTeamName" @bind=_organization.DepartmentTeamName>
+                            </div>
+                            <div class="mb-3">
+                                <label for="Address" class="form-label">@((MarkupString)Constants.ApplicationLabelAddress)</label>
+                                <textarea class="form-control" id="Address" @bind=_organization.Address></textarea>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+                <div class="card-footer d-flex justify-content-end">
+                    <button class="btn btn-primary uniform-btn-width me-3" type="submit">@Constants.ApplicationLabelSave</button>
+                </div>
+            </EditForm>
+        </div>
+    </div>
+}

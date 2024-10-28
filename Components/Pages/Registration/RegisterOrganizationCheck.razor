@@ -1,0 +1,38 @@
+﻿@page "/RegisterOrganizationCheck"
+@using CodersCupAward.Helper
+
+@if (_showWait)
+{
+    <WaitState WaitTitle="@Constants.ApplicationLabelPleaseWait"
+               WaitMessage="@Constants.ApplicationLabelPleaseWaitProcessing" />
+}
+else
+{
+    <div class="container">
+        <div class="card mb-3">
+            <div class="card-body">
+                <h1>Similar Organization</h1>
+
+                <div class="alert alert-info">
+                    Click "join" or continue to create a new organization
+                </div>
+
+                @foreach (var org in _similarOrganizations)
+                {
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <h5 class="card-title">@org.OrganizationName</h5>
+                            <p class="card-text">@org.DepartmentTeamName</p>
+
+                            <button class="btn btn-primary uniform-btn-width" @onclick="() => JoinOrganizationAsync(org.OrganizationId)">Join</button>
+
+                        </div>
+                    </div>
+                }
+            </div>
+            <div class="card-footer d-flex justify-content-end">
+                <button class="btn btn-primary uniform-btn-width me-3" type="button" @onclick="@ContinueToRegisterOrganization">@Constants.ApplicationLabelContinue</button>
+            </div>
+        </div>
+    </div>
+}

@@ -1,0 +1,55 @@
+﻿@page "/CoachIterations"
+
+@using CodersCupAward.Helper
+
+<Microsoft.AspNetCore.Components.Authorization.AuthorizeView Context="AuthenticationContext" Roles="Coach">
+    <Authorized>
+
+        <CoachesNavigation></CoachesNavigation>
+        <DialogAddIteration @ref="_dialogAddIteration" OnSave="RefreshListOnSave"></DialogAddIteration>
+
+        <div class="container">
+            <div class="card">
+                <div class="card-body">
+                    <button class="btn btn-primary mb-3 btn-nav-bar" type="button" @onclick="AddIteration">@Constants.ApplicationLabelAdd</button>
+                    <div class="right-block">
+               
+                    </div>
+
+                    <div class="left-block">
+                        @foreach (var iteration in _iterationsList)
+                        {
+                            <div class="card mb-3">
+                                <div class="card-body">
+
+                                    <div class="message-row-container">
+                                        <label>@Constants.ApplicationLabelIterationName:</label> @iteration.Name
+                                    </div>
+                                    <div class="message-row-container">
+                                        <label>@Constants.ApplicationLabelStartDate:</label>@iteration.StartDate.ToShortDateString()
+                                    </div>
+                                    <div class="message-row-container">
+                                        <label>@Constants.ApplicationLabelEndDate:</label>@iteration.EndDate.ToShortDateString()
+                                    </div>
+                                    <div class="row-button-container">
+
+                                        <button class="btn btn-primary mb-3 me-2 float-end btn-nav-bar" type="button"
+                                                @onclick="()=> EditIteration(iteration)">
+                                            @Constants.ApplicationLabelEdit
+                                        </button>
+
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </Authorized>
+    <NotAuthorized>
+        @{
+            NavigationManager.NavigateTo("/");
+        }
+    </NotAuthorized>
+</Microsoft.AspNetCore.Components.Authorization.AuthorizeView>

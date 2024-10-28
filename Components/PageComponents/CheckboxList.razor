@@ -1,0 +1,65 @@
+﻿
+@typeparam TItem
+
+<div style="@DivStyle">
+
+    @foreach (var item in Data)
+    {
+        var text = TextField?.Invoke(item);
+        var value = ValueField?.Invoke(item).ToString();
+        var valueIsChecked = false;
+        if (value != null)
+        {
+            valueIsChecked = SelectedValues.Contains(value);
+        }
+
+        <input class="@CheckBoxStyle" type="checkbox" checked=@valueIsChecked
+               @onchange="eventArgs => { CheckboxClicked(value, eventArgs.Value); }" />
+        <span>&nbsp;</span>
+        @text <span>&nbsp;</span>
+
+        <span>&nbsp;</span>
+    }
+
+    @ChildContent
+</div>
+
+@code {
+    //Data for the Checkbox
+    [Parameter] public IEnumerable<TItem> Data { get; set; }
+
+    // The field to be shown adjacent to checkbox
+    [Parameter] public Func<TItem, string> TextField { get; set; }
+    // The Value which checkbox will return when checked
+    [Parameter] public Func<TItem, object> ValueField { get; set; }
+    [Parameter] public string DivStyle { get; set; }
+    [Parameter] public string CheckBoxStyle { get; set; }
+    [Parameter] public string LabelStyle { get; set; }
+    // Any child content for the control (if needed)
+    [Parameter] public RenderFragment ChildContent { get; set; }
+    // The array which contains the list of selected checkboxs
+    [Parameter] public List<string> SelectedValues { get; set; }
+    [Parameter] public EventCallback<(List<string>, int FrsQuestionId)> SelectedValuesChanged { get; set; }
+
+    //Method to update the selected value on click on checkbox
+    public void CheckboxClicked(string? aSelectedId, object? aChecked)
+    {
+        if (aChecked != null && (bool)aChecked)
+        {
+            if (aSelectedId != null && !SelectedValues.Contains(aSelectedId))
+            {
+                SelectedValues.Add(aSelectedId);
+            }
+        }
+        else
+        {
+
+            if (aSelectedId != null && SelectedValues.Contains(aSelectedId))
+            {
+                SelectedValues.Remove(aSelectedId);
+            }
+        }
+        // SelectedValuesChanged.InvokeAsync((SelectedValues, FrsQuestion.FrsQuestionId));
+        StateHasChanged();
+    }
+}

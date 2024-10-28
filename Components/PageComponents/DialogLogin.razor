@@ -1,0 +1,83 @@
+﻿@using CodersCupAward.Helper
+@using CodersCupAward.ViewModels
+
+<div class="modal @ModalClass fourthModal" tabindex="-1" role="dialog" style="display:@ModalDisplay">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <EditForm Model="@_loginModel" OnSubmit="LoginUser">
+                <div class="modal-header">
+                    <h5 class="modal-title">Login</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" @onclick="CloseDialog"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <input class="form-control me-2" type="text" placeholder="Email Address" aria-label="Email Address" @bind="_loginModel.EmailAddress">
+                    </div>
+                    <div class="mb-3">
+                        <div class="input-group">
+                            <input id="password" type="@InputType" placeholder="password" aria-label="password" @bind="_loginModel.Password" class="form-control" />
+                            <span class="input-group-text" @onclick="TogglePasswordVisibility" style="cursor:pointer;">
+                                <i style="font-size: 1.2em;" class="bi @(_showPassword ? "bi-eye-slash" : "bi-eye")"></i>
+                            </span>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-primary ms-2" type="submit">Login</button>
+                </div>
+            </EditForm>
+        </div>
+
+    </div>
+</div>
+@if (ShowBackdrop)
+{
+    <div class="modal-backdrop fourthModalBackground fade show"></div>
+}
+@code {
+
+
+    [Inject] private ITranslationLayerHelper TranslationLayerHelper { get; set; }
+
+    [CascadingParameter] public ApplicationSessionViewModel ApplicationSessionViewModel { get; set; }
+
+    private bool _showPassword;
+    private LoginModel _loginModel = new();
+    private string InputType => _showPassword ? "text" : "password";
+
+    [Parameter] public EventCallback<LoginModel> OnLoginUser { get; set; }
+
+    private void TogglePasswordVisibility()
+    {
+        _showPassword = !_showPassword;
+    }
+
+    public string ModalDisplay = "none;";
+    public string ModalClass = "";
+    public bool ShowBackdrop = false;
+
+    public void Show()
+    {
+        ModalDisplay = "block;";
+        ModalClass = "Show";
+        ShowBackdrop = true;
+        StateHasChanged();
+    }
+
+    public void CloseDialog()
+    {
+        ModalDisplay = "none";
+        ModalClass = "";
+        ShowBackdrop = false;
+        StateHasChanged();
+    }
+
+    private async Task LoginUser()
+    {
+        await OnLoginUser.InvokeAsync(_loginModel);
+
+    }
+
+
+}

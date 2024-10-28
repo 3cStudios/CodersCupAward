@@ -1,0 +1,107 @@
+﻿@page "/LeaderBoard"
+@using CodersCupAward.Helper
+
+
+
+<Microsoft.AspNetCore.Components.Authorization.AuthorizeView Context="AuthenticationContext">
+    <Authorized>
+
+        @if (_showWait)
+        {
+            <WaitState WaitTitle="@Constants.ApplicationLabelPleaseWait"
+                       WaitMessage="@Constants.ApplicationLabelPleaseWaitProcessing" />
+        }
+        else
+        {
+            <div class="leaderboard-container">
+                <div class="leaderboard-left">
+                    <h1>
+                        Leaderboard
+                        @if (iterationList.Any())
+                        {
+                            <select>
+                                @foreach (var iteration in iterationList)
+                                {
+                                    if (iteration.IterationId == _selectedIteration.IterationId)
+                                    {
+                                        <option value="@iteration.IterationId" selected>@iteration.Name</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@iteration.IterationId">@iteration.Name</option>
+                                    }
+
+                                }
+                            </select>
+                        }
+                    </h1>
+
+                    <table class="table leaderboard">
+                        <thead>
+                            <tr>
+                                <th scope="col">#</th>
+                                <th scope="col">Coder</th>
+                                <th scope="col">Points</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{
+                                var ranking = 1;
+                            }
+                            @foreach (var applicationUser in applicationUsersList)
+                            {
+                                <tr>
+                                    <th scope="row">@ranking</th>
+                                    <td>
+                                        <div class="inline-profile-image-container">
+                                            @if (applicationUser.ApplicationUserPhoto.Any())
+                                            {
+                                                <img src="@applicationUser.ApplicationUserPhoto.First().Photo" />
+                                            }
+                                        </div>
+                                        @applicationUser.FirstName @applicationUser.LastName
+                                    </td>
+
+                                    <td>@applicationUser.CoderPointTracking.Sum(r => r.Points)</td>
+                                    <td>
+                                        @if (applicationUser.ApplicationUserId == ApplicationSessionViewModel.User.ApplicationUserId)
+                                        {
+                                            <a href="/MyProfile">View Details</a>
+                                        }
+                                    </td>
+                                </tr>
+
+                                ranking++;
+                            }
+                        </tbody>
+                    </table>
+
+                </div>
+                <div class="leaderboard-right hide-on-mobile">
+                    <div class="alert alert-info mb-3">
+                        <strong><a href="/OrganizationMetric">My Organization's Metrics</a></strong>
+                        <p>
+                            See the metrics used to evaluate your code
+                        </p>
+                    </div>
+
+                    <div class="alert alert-info mb-3">
+                        <strong><a href="/CodeMetrics">What makes good code?</a></strong>
+                        <p>
+                            Read best practices when writing great code
+                        </p>
+                    </div>
+                </div>
+            </div>
+        }
+    </Authorized>
+    <NotAuthorized>
+        @{
+            NavigationManager.NavigateTo("/");
+        }
+    </NotAuthorized>
+</Microsoft.AspNetCore.Components.Authorization.AuthorizeView>
+
+
+

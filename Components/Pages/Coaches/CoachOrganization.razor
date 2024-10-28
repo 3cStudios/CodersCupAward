@@ -1,0 +1,71 @@
+﻿@page "/CoachOrganization"
+@using CodersCupAward.Helper
+
+<Microsoft.AspNetCore.Components.Authorization.AuthorizeView Context="AuthenticationContext" Roles="Coach">
+    <Authorized>
+
+        <CoachesNavigation></CoachesNavigation>
+
+
+        @if (_showWait)
+        {
+            <WaitState WaitTitle="@Constants.ApplicationLabelPleaseWait"
+                       WaitMessage="@Constants.ApplicationLabelPleaseWaitProcessing" />
+        }
+        else
+        {
+            <div class="container">
+                <div class="card mb-3">
+                    <EditForm Model="@_organization" OnSubmit="SaveFormAsync">
+                        <div class="card-body">
+                            <div class="right-block hide-on-mobile">
+                                <div class="alert alert-info">
+                                    <p>
+                                        <strong>Why Provide My Organization Info?</strong><br />
+                                        This is the identifier for your organization. If anyone tries
+                                        to register using your organization name, or tries to join as a coder
+                                        you will receive a notification, and you can approve or deny the request.
+                                    </p>
+
+                                </div>
+                            </div>
+
+                            <div class="left-block">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <div class="mb-3">
+                                            <span class="text-danger">*</span>
+                                            <label for="OrganizationName" class="form-label">@((MarkupString)Constants.ApplicationLabelOrganizationName)</label>
+                                            <input type="text" class="form-control" id="OrganizationName" @bind=_organization.OrganizationName>
+                                        </div>
+                                        <div class="mb-3">
+                                            <span class="text-danger">*</span>
+                                            <label for="DepartmentTeamName" class="form-label">@((MarkupString)Constants.ApplicationLabelDepartmentTeamName)</label>
+                                            <input type="text" class="form-control" id="DepartmentTeamName" @bind=_organization.DepartmentTeamName>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="Address" class="form-label">@((MarkupString)Constants.ApplicationLabelAddress)</label>
+                                            <textarea class="form-control" id="Address" @bind=_organization.Address></textarea>
+                                        </div>
+                                    </div>
+                                    <div class="card-footer d-flex justify-content-end">
+                                        <button class="btn btn-primary uniform-btn-width me-3" type="submit">@Constants.ApplicationLabelSave</button>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                        </div>
+                    </EditForm>
+
+                </div>
+            </div>
+        }
+
+    </Authorized>
+    <NotAuthorized>
+        @{
+            NavigationManager.NavigateTo("/");
+        }
+    </NotAuthorized>
+</Microsoft.AspNetCore.Components.Authorization.AuthorizeView>

@@ -1,0 +1,75 @@
+﻿@page "/CoachPoints"
+
+
+
+<Microsoft.AspNetCore.Components.Authorization.AuthorizeView Context="AuthenticationContext" Roles="Coach">
+    <Authorized>
+        <CoachesNavigation></CoachesNavigation>
+                
+        <div class="container">
+            <div class="card">
+                <div class="card-body">
+                    <div class="right-block hide-on-mobile">
+                        <div class="alert alert-info">
+                            <p>
+                                <strong>Automatic Notification</strong><br />
+                                When you add points to a team member they automatically receive an email notification
+                                with a leaderboard update.
+                            </p>
+                            
+
+                        </div>
+                    </div>
+
+                    <div class="left-block">
+                        <table class="table leaderboard">
+                            <thead>
+                                <tr>
+                                    <th scope="col">#</th>
+                                    <th scope="col">Coder</th>
+                                    <th scope="col">Points</th>
+                                    <th scope="col">Edit</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @{
+                                    var ranking = 1;
+                                }
+                                @foreach (var applicationUser in applicationUsersList)
+                                {
+                                    <tr>
+                                        <th scope="row">@ranking</th>
+                                        <td>
+                                            <div class="inline-profile-image-container">
+                                                @if (applicationUser.ApplicationUserPhoto.Any())
+                                                {
+                                                    <img src="@applicationUser.ApplicationUserPhoto.First().Photo" />
+                                                }
+                                            </div>
+                                            @applicationUser.LastName, @applicationUser.FirstName
+                                        </td>
+
+                                        <td>@applicationUser.CoderPointTracking.Sum(r => r.Points)</td>
+                                        <td>
+                                            <button class="btn btn-primary mb-3 me-2 float-end btn-nav-bar" type="button"
+                                                    @onclick="()=> EditTeamMember(applicationUser)">
+                                                Edit
+                                            </button>
+                                        </td>
+                                    </tr>
+
+                                    ranking++;
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </Authorized>
+    <NotAuthorized>
+        @{
+            NavigationManager.NavigateTo("/");
+        }
+    </NotAuthorized>
+</Microsoft.AspNetCore.Components.Authorization.AuthorizeView>

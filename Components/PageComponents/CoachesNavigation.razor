@@ -1,0 +1,77 @@
+﻿<div class="nav-tab-bar-bottom">
+    <div class="container">
+        <ul class="nav nav-tabs outlined-nav-tabs">
+
+            <li class="nav-item outlined-nav-item me-2">
+                <a class="nav-link  @_activeCoaches" @onclick="NavigateToCoachHome">Coaches</a>
+            </li>
+            <li class="nav-item outlined-nav-item me-2">
+                <a class="nav-link @_activeOrganization" @onclick="NavigateToCoachOrganization">Organization</a>
+            </li>
+            <li class="nav-item outlined-nav-item me-2">
+                <a class="nav-link  @_activeIterations" @onclick="NavigateToCoachIterations">Iterations</a>
+            </li>
+            <li class="nav-item outlined-nav-item me-2">
+                <a class="nav-link  @_activeTeam" @onclick="NavigateToCoachTeam">Team</a>
+            </li>
+            <li class="nav-item outlined-nav-item me-2">
+                <a class="nav-link  @_activeMetrics" @onclick="NavigateToCoachDefineMetrics">Metrics</a>
+            </li>
+            <li class="nav-item outlined-nav-item me-2">
+                <a class="nav-link  @_activePoints" @onclick="NavigateToCoachPoints">Points</a>
+            </li>
+        </ul>
+    </div>
+</div>
+@code {
+    [Inject] private NavigationManager NavigationManager { get; set; }
+
+    private string _activeCoaches = "";
+    private string _activeOrganization = "";
+    private string _activeIterations = "";
+    private string _activeTeam = "";
+    private string _activeMetrics = "";
+    private string _activePoints = "";
+
+
+    protected override void OnInitialized()
+    {
+        var currentUri = NavigationManager.Uri;
+        _activeCoaches = currentUri.Contains("CoachHome") ? "active" : "";
+        _activeOrganization = currentUri.Contains("CoachOrganization") ? "active" : "";
+        _activeIterations = currentUri.Contains("CoachIterations") ? "active" : "";
+        _activeTeam = currentUri.Contains("CoachTeam") ? "active" : "";
+        _activeMetrics = currentUri.Contains("CoachDefineMetrics") ? "active" : "";
+        _activePoints = currentUri.Contains("CoachPoints") ? "active" : "";
+    }
+
+
+    private void NavigateToCoachOrganization()
+    {
+        NavigationManager.NavigateTo("/CoachOrganization");
+    }
+
+    private void NavigateToCoachDefineMetrics()
+    {
+        NavigationManager.NavigateTo("/CoachDefineMetrics");
+    }
+    private void NavigateToCoachTeam()
+    {
+        NavigationManager.NavigateTo("/CoachTeam");
+    }
+
+    private void NavigateToCoachHome()
+    {
+        NavigationManager.NavigateTo("/CoachHome");
+    }
+
+    private void NavigateToCoachPoints()
+    {
+        NavigationManager.NavigateTo("/CoachPoints");
+    }
+
+    private void NavigateToCoachIterations()
+    {
+        NavigationManager.NavigateTo("/CoachIterations");
+    }
+}

@@ -1,0 +1,73 @@
+﻿@using CodersCupAward.Helper
+@using CodersCupAward.ViewModels
+
+
+
+<div class="modal @ModalClass fourthModal" tabindex="-1" role="dialog" style="display:@ModalDisplay">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">@_dialogTitle</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" @onclick="CloseDialog"></button>
+            </div>
+            <div class="modal-body">
+                @_dialogMessage
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary float-end me-3 uniform-btn-width" type="button" @onclick="ModalResultFalse">@Constants.ApplicationLabelNo</button>
+                <button class="btn btn-primary float-end me-3 uniform-btn-width" type="button" @onclick="ModalResultTrue">@Constants.ApplicationLabelYes</button>
+            </div>
+        </div>
+
+    </div>
+</div>
+@if (ShowBackdrop)
+{
+    <div class="modal-backdrop fourthModalBackground fade show"></div>
+}
+@code {
+
+
+    [Inject] private ITranslationLayerHelper TranslationLayerHelper { get; set; }
+
+    [CascadingParameter] public ApplicationSessionViewModel ApplicationSessionViewModel { get; set; }
+
+    private string _dialogTitle;
+    private string _dialogMessage;
+
+    [Parameter] public EventCallback<bool> ModalResult { get; set; }
+
+    public string ModalDisplay = "none;";
+    public string ModalClass = "";
+    public bool ShowBackdrop = false;
+
+    public void Confirm(string dialogTitle, string dialogMessage)
+    {
+        ModalDisplay = "block;";
+        ModalClass = "Show";
+        ShowBackdrop = true;
+        _dialogTitle = dialogTitle;
+        _dialogMessage = dialogMessage;
+        StateHasChanged();
+    }
+
+    private void CloseDialog()
+    {
+        ModalDisplay = "none";
+        ModalClass = "";
+        ShowBackdrop = false;
+        StateHasChanged();
+    }
+
+    private async Task ModalResultTrue()
+    {
+        await ModalResult.InvokeAsync(true);
+        CloseDialog();
+    }
+    private async Task ModalResultFalse()
+    {
+        await ModalResult.InvokeAsync(false);
+        CloseDialog();
+    }
+    
+}

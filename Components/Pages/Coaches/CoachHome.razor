@@ -1,0 +1,163 @@
+﻿@page "/CoachHome"
+
+<Microsoft.AspNetCore.Components.Authorization.AuthorizeView Context="AuthenticationContext" Roles="Coach">
+    <Authorized>
+
+
+        <CoachesNavigation></CoachesNavigation>
+        <div class="container">
+            <div class="container">
+                <div class="card">
+                    <div class="card-body">
+
+                        <div class="right-block hide-on-mobile">
+                            <div class="alert alert-info">
+                                <p>
+                                    <strong>What's a coach?</strong><br />
+                                    You are either the coach by default because you created the organization,
+                                    or you have been appointed or anointed by someone who cares deeply.
+                                    Either way, you get to invite team members,
+                                    assign roles, create metrics, and assign points.
+                                </p>
+                                <p>
+                                    <strong>What do I have to do?</strong><br />
+                                    Once the checklist on this page is complete, you or your anointees,
+                                    award points to team members for the code they write using the metrics
+                                    you define.
+                                </p>
+                                <p>
+                                    <strong>What is the point?</strong><br />
+
+                                    The goal is to provide feedback more frequently on coding practices and reward "good behaviors" for
+                                    those who follow best practices and improve their coding skills.
+                                    <br />
+
+                                    Science has proven that small rewards can help foster autonomous motivation
+                                    and serve as tool for behavioral change.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="left-block">
+                            <table class="table leaderboard">
+                                <thead>
+                                    <tr>
+                                        <th scope="col"></th>
+                                        <th scope="col">To-Do</th>
+                                        <th scope="col"></th>
+
+                                    </tr>
+                                </thead>
+                                <tbody>
+
+                                    <tr>
+                                        <th scope="row">
+                                            <div class="checkbox-image">
+                                                @if (HasTeamMembers())
+                                                {
+                                                    <img src="/images/CheckedCheckBox.png" />
+                                                }
+                                                else
+                                                {
+                                                    <img src="/images/UnCheckCheckBox.png" />
+                                                }
+
+                                            </div>
+                                        </th>
+                                        <td>
+                                            <strong>Step 1</strong>  Invite team members.
+                                        </td>
+                                        <td>
+                                            <button class="btn btn-primary ms-2" type="button" @onclick="NavigateToCoachEditTeamMember">Team</button>
+                                        </td>
+                                    </tr>
+                                <tr>
+                                    <th scope="row">
+                                        <div class="checkbox-image">
+                                            @if (HasIterations())
+                                            {
+                                                <img src="/images/CheckedCheckBox.png" />
+                                            }
+                                            else
+                                            {
+                                                <img src="/images/UnCheckCheckBox.png" />
+                                            }
+                                        </div>
+                                    </th>
+                                    <td>
+                                        <strong>Step 2</strong> Create Iteration.
+                                    </td>
+                                    <td>
+                                            <button class="btn btn-primary ms-2" type="button">Iterations</button>
+                                    </td>
+                                </tr>
+                                    <tr>
+                                        <th scope="row">
+                                            <div class="checkbox-image">
+                                                @if (HasTeamMetrics())
+                                                {
+                                                    <img src="/images/CheckedCheckBox.png" />
+                                                }
+                                                else
+                                                {
+                                                    <img src="/images/UnCheckCheckBox.png" />
+                                                }
+                                            </div>
+                                        </th>
+                                        <td>
+                                            <strong>Step 2</strong> Create metrics.
+                                        </td>
+                                        <td>
+                                            <button class="btn btn-primary ms-2" type="button">Metrics</button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">
+                                            <div class="checkbox-image">
+                                                @if (HasPoints())
+                                                {
+                                                    <img src="/images/CheckedCheckBox.png" />
+                                                }
+                                                else
+                                                {
+                                                    <img src="/images/UnCheckCheckBox.png" />
+                                                }
+                                            </div>
+                                        </th>
+                                        <td>
+                                            <strong>Step 3</strong> Assign points to team members.
+                                        </td>
+                                        <td>
+                                            <button class="btn btn-primary ms-2" type="button">Points</button>
+                                        </td>
+                                    </tr>
+
+                                    <tr>
+                                        <th scope="row">
+
+                                        </th>
+                                        <td>
+                                            <strong>Step 4</strong> Use the Leaderboard to acknowledge who did good and why.
+                                        </td>
+                                        <td>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </Authorized>
+    <NotAuthorized>
+        @{
+            NavigationManager.NavigateTo("/");
+        }
+    </NotAuthorized>
+</Microsoft.AspNetCore.Components.Authorization.AuthorizeView>
+
+
+

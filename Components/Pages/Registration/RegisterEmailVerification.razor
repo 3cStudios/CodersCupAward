@@ -1,0 +1,118 @@
+﻿@page "/RegisterEmailVerification"
+@page "/RegisterEmailVerification/{UID:guid}"
+
+@using CodersCupAward.Helper
+@using CodersCupAward.ViewModels
+@using Microsoft.AspNetCore.Components.Authorization
+
+
+@if (_showWait)
+{
+    <WaitState WaitTitle="@Constants.ApplicationLabelPleaseWait"
+               WaitMessage="@Constants.ApplicationLabelPleaseWaitProcessing" />
+}
+else
+{
+    <div class="container">
+        <div class="card mb-3">
+            <div class="card-body">
+              
+                
+                    <h1>Email Verification Failed</h1>
+
+                    <div class="alert alert-danger">
+                        
+                        <p>
+                            You should have been sent an email with a link for you to click to verify your registration, 
+                            we are not sure how you actually got here or why.
+                        </p>
+                        <p>
+                            I would normally say please contact support, but honestly, there isn't any. Sad, isn't it?
+                            We are all alone in this world.
+                        </p>
+                        <p>
+                            Hope is not entirely lost though, you can email <a href="mailto:support@3cstudios.com">Support@3cstudios.com</a> and if by some miracle someone
+                            actually reads it, they might decide to help you, but then again...
+                        </p>
+                    </div>
+                
+
+            </div>
+
+        </div>
+    </div>
+
+}
+
+
+
+
+@code {
+
+    [Inject] private IApplicationUserHelper ApplicationUserHelper { get; set; }
+    [Inject] private AuthenticationStateProvider AuthenticationStateProvider { get; set; }
+    [Inject] private NavigationManager NavigationManager { get; set; }
+    [Inject] private IApplicationSessionHelper ApplicationSessionHelper { get; set; }
+    [Inject] private ISecurityHelper SecurityHelper { get; set; }
+
+    private bool _showWait;
+    private PeriodicTimer _periodicTimer;
+    @* ReSharper disable InconsistentNaming for the purpose of the query string in the email URL*@
+    [Parameter]
+    public Guid UID { get; set; }
+    @* ReSharper restore InconsistentNaming *@
+
+    [CascadingParameter] public ApplicationSessionViewModel ApplicationSessionViewModel { get; set; }
+
+    protected override void OnInitialized()
+    {
+        _showWait = true;
+        
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            if (UID != Guid.Empty)
+            {
+                await SecurityHelper.RemoveRememberMeTokenAsync();
+                var user = await ApplicationUserHelper.GetByUserUIdAsync(UID);
+                if (user is { ApplicationUserId: > 0 })
+                {
+                    user.EmailAddressVerified = true;
+                    await ApplicationUserHelper.SaveAsync(user);
+                    ApplicationSessionViewModel.User = user;
+                    await ApplicationSessionHelper.TrackSession(ApplicationSessionViewModel);
+                    
+                    NavigationManager.NavigateTo("/RegisterUserCreatePassword");
+                }
+                _showWait = false;
+            }
+            else
+            {
+                StartTimer();
+            }
+
+        }
+    }
+    
+    private async void StartTimer()
+    {
+        _periodicTimer = new PeriodicTimer(TimeSpan.FromSeconds(3));
+        
+        while (await _periodicTimer.WaitForNextTickAsync()) { 
+            _showWait = false;
+            StateHasChanged();
+            _periodicTimer.Dispose();
+        }
+    }
+
+    public void Dispose()
+    {
+        _periodicTimer.Dispose();
+        GC.SuppressFinalize(this);
+    }
+
+}
+
